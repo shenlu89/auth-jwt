@@ -6,7 +6,7 @@ const logger = require('morgan');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const passport = require('passport');
-// const cors = require('cors')
+const cors = require('cors')
 
 require('./models/db');
 require('./config/passport');
@@ -17,7 +17,7 @@ const routes = require('./routes/index');
 const app = express();
 
 // Access-Control-Allow-Origin:'*', which should be delete later from your muture production.
-// app.use(cors());
+app.use(cors());
 
 // uncomment after placing your favicon in /public
 // app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
