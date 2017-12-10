@@ -4,7 +4,7 @@ const options = {
 	useMongoClient: true
 };
 
-const dbURI = 'mongodb://localhost/auth-jwt';
+let dbURI = 'mongodb://localhost/auth-jwt';
 
 mongoose.Promise = global.Promise;
 
