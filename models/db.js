@@ -10,6 +10,7 @@ mongoose.Promise = global.Promise;
 
 if (process.env.NODE_ENV === 'production') {
     dbURI = process.env.MONGOLAB_URI;
+    console.log(process.env.MONGOLAB_URI)
 }
 
 mongoose.connect(dbURI, options);
