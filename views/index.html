@@ -7,7 +7,7 @@
 </head>
 
 <body>
-    <div id="app" class="container" v-cloak>
+    <div id="app" class="container">
         <header>
             <router-link to="/">Home |</router-link>
             <router-link v-show="!isLoggedIn()" to="/login">Login |</router-link>
@@ -25,7 +25,9 @@
     <script type="text/javascript">
     Vue.prototype.$http = axios;
 
-    var Home = { template: '<h2>Welcome! Please login or Register.</h2>' };
+    var Home = { 
+        template: '<h2>Welcome! Please login or Register.</h2>'
+    };
     var Login = {
         template: `<form @submit.prevent="onSubmit()">
         <div v-show="formError">{{ formError }}</div>
@@ -64,15 +66,15 @@
                     vm.saveToken(res.data.token);
                     window.location.replace('/');
                 }).catch((err) => {
-                	// console.log(err.response.data.message)
                     this.formError = err.response.data.message;
+                    console.log(err);
                 });
             }
         }
     };
     var Register = {
         template: `<form @submit.prevent="onSubmit()">
-        <div v-show="formError">{{ formError }}</div>
+        <div v-show="formError">{{ formError }} <a href='/login'>login!</a></div>
         <div>
           <label for="name">Full name</label>
           <input type="text" id="name" placeholder="Enter your name" v-model="credentials.name">
@@ -101,7 +103,7 @@
             onSubmit: function() {
                 this.formError = "";
                 if (!this.credentials.name || !this.credentials.email || !this.credentials.password) {
-                    this.formError = "All fields required, please try again";
+                    this.formError = "All fields required, please try again!";
                 } else {
                     this.doRegister();
                 }
@@ -110,11 +112,9 @@
                 this.formError = "";
                 this.$http.post('/register', this.credentials).then((res) => {
                     vm.saveToken(res.data.token);
-                }).then((res) => {
                     window.location.replace('/');
-                }).catch(function(err) {
-                    this.formError = err;
-                    // console.log(err)
+                }).catch((err) => {
+                    this.formError = "You alread have an account, please";
                 });
             }
         }

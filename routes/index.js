@@ -12,10 +12,6 @@ router.get('(/|login|register|account)', function(req, res) {
   res.sendFile(path.join(__dirname, '..', 'views', 'index.html'));
 });
 
-router.get('*', function(req, res){
-  res.redirect('/');
-});
-
 const ctrlAuth = require('../controllers/auth');
 
 // authentication
