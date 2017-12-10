@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Auth JWT</title>
+    <link rel="stylesheet" href="/stylesheets/style.css">
+</head>
+
+<body>
+    <div id="app" class="container" v-cloak>
+        <header>
+            <router-link to="/">Home |</router-link>
+            <router-link v-show="!isLoggedIn()" to="/login">Login |</router-link>
+            <router-link v-show="!isLoggedIn()" to="/register">Register</router-link>
+            <router-link v-show="isLoggedIn()" to="/account">Account |</router-link>
+            <router-link v-show="isLoggedIn()" v-on:click.native="logout()" to="/">Logout</router-link>
+        </header>
+        <div>
+            <router-view></router-view>
+        </div>
+    </div>
+    <script src="/javascripts/vue.min.js"></script>
+    <script src="/javascripts/vue-router.min.js"></script>
+    <script src="/javascripts/axios.min.js"></script>
+    <script type="text/javascript">
+    Vue.prototype.$http = axios;
+
+    var Home = { template: '<h2>Welcome! Please login or Register.</h2>' };
+    var Login = {
+        template: `<form @submit.prevent="onSubmit()">
+        <div v-show="formError">{{ formError }}</div>
+        <div>
+          <label for="email">Email address</label>
+          <input type="email" id="email" placeholder="Enter email" v-model="credentials.email">
+        </div>
+        <div>
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Password" v-model="credentials.password">
+        </div>
+        <button type="submit">Sign in</button>
+      </form>`,
+        data() {
+            return {
+                credentials: {
+                    email: '',
+                    password: ''
+                },
+                formError: false
+            }
+        },
+        methods: {
+            onSubmit: function() {
+                this.formError = "";
+                if (!this.credentials.email || !this.credentials.password) {
+                    this.formError = "All fields required, please try again";
+                    return false;
+                } else {
+                    this.doLogin();
+                }
+            },
+            doLogin: function() {
+                this.formError = "";
+                this.$http.post('/login', this.credentials).then((res) => {
+                    vm.saveToken(res.data.token);
+                    window.location.replace('/');
+                }).catch((err) => {
+                	// console.log(err.response.data.message)
+                    this.formError = err.response.data.message;
+                });
+            }
+        }
+    };
+    var Register = {
+        template: `<form @submit.prevent="onSubmit()">
+        <div v-show="formError">{{ formError }}</div>
+        <div>
+          <label for="name">Full name</label>
+          <input type="text" id="name" placeholder="Enter your name" v-model="credentials.name">
+        </div>
+        <div>
+          <label for="email">Email address</label>
+          <input type="email" id="email" placeholder="Enter email" v-model="credentials.email">
+        </div>
+        <div>
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Password" v-model="credentials.password">
+        </div>
+        <button type="submit">Sign up</button>
+      </form>`,
+        data() {
+            return {
+                credentials: {
+                    name: '',
+                    email: '',
+                    password: ''
+                },
+                formError: false
+            }
+        },
+        methods: {
+            onSubmit: function() {
+                this.formError = "";
+                if (!this.credentials.name || !this.credentials.email || !this.credentials.password) {
+                    this.formError = "All fields required, please try again";
+                } else {
+                    this.doRegister();
+                }
+            },
+            doRegister: function() {
+                this.formError = "";
+                this.$http.post('/register', this.credentials).then((res) => {
+                    vm.saveToken(res.data.token);
+                }).then((res) => {
+                    window.location.replace('/');
+                }).catch(function(err) {
+                    this.formError = err;
+                    // console.log(err)
+                });
+            }
+        }
+    };
+
+    var Account = {
+        template: `<h2>Congrats! <span>{{ name }}</span><h2>`,
+        data() {
+            return {
+                name: vm.currentUser().name
+            }
+        }
+    }
+
+    var router = new VueRouter({
+        mode: 'history',
+        routes: [
+            { path: '/', component: Home },
+            { path: '/login', component: Login },
+            { path: '/register', component: Register },
+            { path: '/account', component: Account }
+        ]
+    });
+
+    var vm = new Vue({
+        router,
+        el: '#app',
+        methods: {
+            saveToken: function(token) {
+                window.localStorage['jwt-token'] = token;
+            },
+            getToken: function(){
+                return window.localStorage['jwt-token'];
+            },
+            isLoggedIn: function(){
+                var token = this.getToken();
+                if(token){
+                    var payload = JSON.parse(window.atob(token.split('.')[1]));
+                    return payload.exp > Date.now() / 1000;
+                } else {
+                    return false;
+                }
+            },
+            currentUser: function() {
+                if(this.isLoggedIn()){
+                    var token = this.getToken();
+                    var payload = JSON.parse(window.atob(token.split('.')[1]));
+                    return {
+                        email : payload.email,
+                        name : payload.name
+                    };
+                }
+            },
+            logout: function(){
+                window.localStorage.removeItem('jwt-token');
+                window.location.replace('/');
+            }
+        }
+    });
+    </script>
+</body>
+
+</html>
